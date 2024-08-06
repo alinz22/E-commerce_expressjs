@@ -29,9 +29,7 @@ app.use((req, res, next) => {
       req.user = user;
       next();
     })
-    .catch((err) => {
-      console.error(err);
-    });
+    .catch((err) => console.log(err));
 });
 
 app.use("/admin", adminRoutes);
@@ -48,26 +46,25 @@ Product.belongsToMany(Cart, { through: CartItem });
 Order.belongsTo(User);
 User.hasMany(Order);
 Order.belongsToMany(Product, { through: OrderItem });
-Product.belongsToMany(Order, { through: OrderItem });
 
 sequelize
-  // .sync({ force: true }) // Forcing table creation even if it already exists)
+  // .sync({ force: true })
   .sync()
   .then((result) => {
     return User.findByPk(1);
-    console.log(result);
+    // console.log(result);
   })
   .then((user) => {
     if (!user) {
-      return User.create({ name: "Alan", email: "Alan@example.com" });
+      return User.create({ name: "Max", email: "test@test.com" });
     }
     return user;
   })
   .then((user) => {
-    // console.log(User);
+    // console.log(user);
     return user.createCart();
   })
-  .then((result) => {
+  .then((cart) => {
     app.listen(3000);
   })
   .catch((err) => {
