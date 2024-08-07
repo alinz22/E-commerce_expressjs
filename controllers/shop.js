@@ -3,6 +3,7 @@ const Product = require("../models/product");
 exports.getProducts = (req, res, next) => {
   Product.find()
     .then((products) => {
+      console.log(products);
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
@@ -43,15 +44,30 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   req.user
-    .getCart()
-    .then((products) => {
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items
+        .map((item) => {
+          if (item.productId) {
+            return { ...item.productId._doc, quantity: item.quantity };
+          }
+          console.warn("Missing product for item:", item);
+          return null;
+        })
+        .filter((item) => item !== null);
+
+      console.log("Filtered products:", products); // Add this log to see the final list
+
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.error("Error retrieving cart:", err);
+      res.redirect("/");
+    });
 };
 
 exports.postCart = (req, res, next) => {
