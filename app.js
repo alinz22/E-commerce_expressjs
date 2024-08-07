@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
 const errorController = require("./controllers/error");
-// const User = require("./models/user");
+const User = require("./models/user");
 
 const app = express();
 
@@ -18,14 +18,17 @@ const shopRoutes = require("./routes/shop");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use((req, res, next) => {
-//   User.findById("5baa2528563f16379fc8a610")
-//     .then((user) => {
-//       req.user = new User(user.name, user.email, user.cart, user._id);
-//       next();
-//     })
-//     .catch((err) => console.log(err));
-// });
+// Middleware to set req.user
+app.use((req, res, next) => {
+  User.findById("66b2bb51329c68500320c6f8") // Provide a valid user ID
+    .then((user) => {
+      if (user) {
+        req.user = user;
+      }
+      next();
+    })
+    .catch((err) => console.log(err));
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
@@ -37,6 +40,22 @@ mongoose
     "mongodb+srv://butter:food@cluster0.x7ufutg.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0"
   )
   .then(() => {
-    app.listen(3000);
+    return User.findOne();
+  })
+  .then((user) => {
+    if (!user) {
+      const user = new User({
+        name: "John Doe",
+        email: "john@example.com",
+        cart: { items: [] },
+      });
+      return user.save();
+    }
+    return user;
+  })
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
   })
   .catch((err) => console.log(err));
