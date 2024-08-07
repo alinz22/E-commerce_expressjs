@@ -9,7 +9,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -25,7 +25,7 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: "/products",
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -38,7 +38,7 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: "Shop",
         path: "/",
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -66,7 +66,7 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -82,12 +82,11 @@ exports.postCart = (req, res, next) => {
       return req.user.addToCart(product);
     })
     .then(() => {
-      // Simplified redirect after adding to cart.
       res.redirect("/cart");
     })
     .catch((err) => {
       console.log(err);
-      res.redirect("/"); // Redirect or handle the error more appropriately.
+      res.redirect("/");
     });
 };
 
@@ -108,14 +107,14 @@ exports.postOrder = (req, res, next) => {
       const products = user.cart.items.map((i) => {
         return {
           quantity: i.quantity,
-          product: { ...i.productId._doc }, // Assuming productId is the full product document
+          product: { ...i.productId._doc },
         };
       });
 
       const order = new Order({
         user: {
           name: req.user.name,
-          userId: req.user._id, // Assuming this should reference the _id of the user
+          userId: req.user._id,
         },
         products: products,
       });
@@ -123,7 +122,7 @@ exports.postOrder = (req, res, next) => {
       return order.save();
     })
     .then(() => {
-      return req.user.clearCart(); // Clear the cart after the order is placed.
+      return req.user.clearCart();
     })
     .then((result) => {
       res.redirect("/orders");
@@ -141,7 +140,7 @@ exports.getOrders = (req, res, next) => {
         path: "/orders",
         pageTitle: "Your Orders",
         orders: orders,
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
