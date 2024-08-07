@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -76,9 +77,13 @@ exports.postCart = (req, res, next) => {
     .then((product) => {
       return req.user.addToCart(product);
     })
-    .then((result) => {
-      console.log(result);
+    .then(() => {
+      // Simplified redirect after adding to cart.
       res.redirect("/cart");
+    })
+    .catch((err) => {
+      console.log(err);
+      res.redirect("/"); // Redirect or handle the error more appropriately.
     });
 };
 
@@ -93,18 +98,40 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
-  let fetchedCart;
   req.user
-    .addOrder()
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items.map((i) => {
+        return {
+          quantity: i.quantity,
+          product: { ...i.productId._doc }, // Assuming productId is the full product document
+        };
+      });
+
+      const order = new Order({
+        user: {
+          name: req.user.name,
+          userId: req.user._id, // Assuming this should reference the _id of the user
+        },
+        products: products,
+      });
+
+      return order.save();
+    })
+    .then(() => {
+      return req.user.clearCart(); // Clear the cart after the order is placed.
+    })
     .then((result) => {
       res.redirect("/orders");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+      res.redirect("/");
+    });
 };
 
 exports.getOrders = (req, res, next) => {
-  req.user
-    .getOrders()
+  Order.find({ "user.userId": req.user._id })
     .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",
