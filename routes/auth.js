@@ -20,6 +20,7 @@ router.post(
     check("email")
       .isEmail()
       .withMessage("Please enter a valid email address")
+      .normalizeEmail()
       .custom((value, { req }) => {
         return User.findOne({ email: value }).then((userDoc) => {
           if (userDoc) {
@@ -32,13 +33,16 @@ router.post(
       "Please enter a password with only Alphanumeric characters with at least 5 characters."
     )
       .isLength({ min: 5 })
-      .isAlphanumeric(),
-    body("confirmPassword").custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Passwords do not match");
-      }
-      return true;
-    }),
+      .isAlphanumeric()
+      .trim(),
+    body("confirmPassword")
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error("Passwords do not match");
+        }
+        return true;
+      })
+      .trim(),
   ],
   authController.postSignup
 );
