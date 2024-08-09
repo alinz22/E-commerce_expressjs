@@ -25,6 +25,11 @@ exports.postAddProduct = (req, res, next) => {
       path: "/admin/add-product",
       editing: false,
       hasError: true,
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
       errorMessage: "Please upload an image!",
       validationErrors: [],
     });
