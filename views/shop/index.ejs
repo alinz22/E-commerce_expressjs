@@ -1,5 +1,5 @@
 <%- include('../includes/head.ejs') %>
-    <link rel="stylesheet" href="/css/product.css">
+<link rel="stylesheet" href="/css/product.css">
 </head>
 
 <body>
@@ -24,19 +24,29 @@
                         <div class="card__actions">
                             <a href="/products/<%= product._id %>" class="btn">Details</a>
                             <% if (isAuthenticated) { %>
-                                <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                <%- include('../includes/add-to-cart.ejs', { product: product }) %>
                             <% } %>
                         </div>
-                        
                     </article>
                 <% } %>
             </div>
             <section class="pagination">
-                <a href="/?page=1">1</a>
-                <a href="/?page=2">2</a>
+                <% if (currentPage !== 1 && previousPage !== 1) { %>
+                    <a href="/?page=1">1</a>
+                <% } %>
+                <% if (hasPreviousPage) { %>
+                    <a href="/?page=<%= previousPage %>"><%= previousPage %></a>
+                <% } %>
+                <a href="/?page=<%= currentPage %>" class="active"><%= currentPage %></a>
+                <% if (hasNextPage) { %>
+                    <a href="/?page=<%= nextPage %>"><%= nextPage %></a>
+                <% } %>
+                <% if (lastPage !== currentPage && nextPage !== lastPage) { %>
+                    <a href="/?page=<%= lastPage %>"><%= lastPage %></a>
+                <% } %>
             </section>
         <% } else { %>
             <h1>No Products Found!</h1>
         <% } %>
     </main>
-<%- include('../includes/end.ejs') %>
+    <%- include('../includes/end.ejs') %>

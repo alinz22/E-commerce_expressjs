@@ -266,6 +266,11 @@ form {
   color: white;
 }
 
+.pagination a:active {
+  background: #00695c;
+  color: white;
+}
+
 .pagination a.active {
   background: #00695c;
   color: white;
