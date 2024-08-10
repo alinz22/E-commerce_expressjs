@@ -132,6 +132,37 @@ exports.postCartDeleteProduct = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
+exports.getCheckout = (req, res, next) => {
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items
+        .map((item) => {
+          if (item.productId) {
+            return { ...item.productId._doc, quantity: item.quantity };
+          }
+          console.warn("Missing product for item:", item);
+          return null;
+        })
+        .filter((item) => item !== null);
+      let total = 0;
+      products.forEach((p) => {
+        total += p.price * p.quantity;
+      });
+
+      res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+        products: products,
+        totalSum: total,
+      });
+    })
+    .catch((err) => {
+      console.error("Error retrieving cart:", err);
+      res.redirect("/");
+    });
+};
+
 exports.postOrder = (req, res, next) => {
   req.user
     .populate("cart.items.productId")

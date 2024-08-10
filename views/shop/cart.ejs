@@ -21,10 +21,16 @@
             </ul>
             <hr>
             <div class="centered">
-                <form action="/create-order" method="POST">
+                <!-- <form action="/create-order" method="POST">
                     <button type="submit" class="btn">Order Now!</button>
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                </form>
+                </form> -->
+                <a href="/products" class="btn">Continue Shopping</a> <!-- Use a relative path to the products page -->
+                <a href="/checkout" class="btn">Checkout</a> <!-- Use a relative path to the checkout page -->
+                <form action="/cart-empty" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button type="submit" class="btn danger">Empty Cart</button>
+                </form> <!-- Use a relative path to the cart page -->
             </div>
         <% } else { %>
             <h1>No Products in Cart!</h1>
